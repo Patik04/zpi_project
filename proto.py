@@ -7,6 +7,9 @@ import unit
 import wifiCfg
 from m5mqtt import M5mqtt
 
+##########################################################
+#                      Variables                         #
+##########################################################
 # Output variables
 hum = 0
 temp = 0
@@ -56,29 +59,9 @@ hour = None
 minut = None
 sec = None 
 
-###########################################
-# Functions which works with buttons 
-def buttonA_wasPressed():
-  """
-  function decreaments alert_value if button A is pressed
-  """
-  global alert_val, minAlert
-  if (alert_val > minAlert):
-    alert_val = alert_val - 1
-    updateAlert()
-
-
-def buttonC_wasPressed():
-  """
-  function increaments alert_value if button C is pressed
-  """
-  global alert_val, maxAlert
-  if (alert_val < maxAlert):
-    alert_val = alert_val + 1
-    updateAlert()
-  
-#############################################
-# Functions, which works with screen
+##########################################################
+#                     Screen Settings                    #
+##########################################################
 def Screen_Set():
   """
   This function set UI of m5stack 
@@ -105,6 +88,37 @@ def Screen_Set():
   line_Hor = M5Line(0, 120, 320, 115, 0x0000ff, 5)  # horizontal line
   line_Ver = M5Line(160, 0, 160, 120, 0x0000ff, 5)  # vertical line
 
+def Screen_Update():
+  """
+  Functions updates temperature and humidity value on the screen
+  Also changes pictuere of thermometer on the screen if temperature is under 0
+  """
+  global temp, hum, txtHum, txtTemp
+  txtTemp.set_text("%.2f°C" %temp)
+  txtHum.set_text("%.2f" %hum + "%")
+  if (temp <= 0):
+    imgTemp = M5Img("res/tcold.png", x = 80, y = 42, parent = None)
+  else:
+    imgTemp = M5Img("res/thot.png", x = 80, y = 42, parent = None)
+  alertSign()
+
+
+##########################################################
+#                    Alert's Functions                   #
+##########################################################
+def alertSign():
+  """
+  Function shows text, which indicates exeeding of aler value
+  """
+  global alert_val, alertNow, alertCount, temp, txtAlText
+  if (alert_val < temp):
+    alertCount += 1
+    if (alertCount == alertNow):
+      txtAlText.set_text("Value Exceeded!")
+  else:
+    alertCount = 0
+    txtAlText.set_text("")
+
 
 def updateAlert():
   """
@@ -119,23 +133,29 @@ def updateAlert():
     txtAlert.set_pos(150,160)
 
   txtAlert.set_text(str(alert_val))
-  
 
-def Screen_Update():
+
+def buttonA_wasPressed():
   """
-  Functions updates temperature and humidity value on the screen
-  Also changes pictuere of thermometer on the screen if temperature is under 0
+  function decreaments alert_value if button A is pressed
   """
-  global temp, hum, txtHum, txtTemp
-  txtTemp.set_text("%.2f°C" %temp)
-  txtHum.set_text("%.2f" %hum + "%")
-  if (temp <= 0):
-    imgTemp = M5Img("res/tcold.png", x = 80, y = 42, parent = None)
-  else:
-    imgTemp = M5Img("res/thot.png", x = 80, y = 42, parent = None)
-  alertSign()
- 
- ########################################################################### 
+  global alert_val, minAlert
+  if (alert_val > minAlert):
+    alert_val = alert_val - 1
+    updateAlert()
+
+
+def buttonC_wasPressed():
+  """
+  function increaments alert_value if button C is pressed
+  """
+  global alert_val, maxAlert
+  if (alert_val < maxAlert):
+    alert_val = alert_val + 1
+    updateAlert()
+##########################################################
+#                     WiFi Connection                    #
+##########################################################
 
 def connectWiFi():
   """
@@ -148,20 +168,6 @@ def connectWiFi():
   txtWifi.set_text("Wi-Fi connected.")
   wait(2)
   txtWifi.set_text("")
-  
-def alertSign():
-  """
-  Function shows text, which indicates exeeding of aler value
-  """
-  global alert_val, alertNow, alertCount, temp, txtAlText
-  if (alert_val < temp):
-    alertCount += 1
-    if (alertCount == alertNow):
-      txtAlText.set_text("Value Exceeded!")
-  else:
-    alertCount = 0
-    txtAlText.set_text("")
-
 
 ##########################################################
 #                 Time Settings function                 #
@@ -203,7 +209,9 @@ def buttonB_wasPressed():
       m5Info.set_text("Time already reset!")
       wait(2)
       m5Info.set_text("")
-##############################################################################
+##########################################################
+#                    Sensor's Function                   #
+##########################################################
 
 def loadData():
   """
@@ -213,6 +221,9 @@ def loadData():
   temp = env.temperature
   hum = env.humidity
 
+##########################################################
+#                     MQTT's Functions                   #
+##########################################################
 def sentData():
   """
   function sent data to MQTT server
@@ -240,7 +251,9 @@ def sub_cb(data):
     wait(2)
     pass
   
-##############################################################################
+##########################################################
+#                     Main Code                          #
+##########################################################
 
 def main():
   global m5mqtt, day, month, year, hour, minut, sec, m5Info
