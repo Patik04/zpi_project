@@ -40,11 +40,20 @@ rtc = machine.RTC()
 
 # MQTT variables
 name = "PatejdlM5"
-host = "broker.mqtt.cool"
+host = "test.mosquitto.org"
 port = 1883
 topHum = "zpi/humidity"
 topTem = "zpi/temperature"
+topTime = "zpi/time"
 m5mqtt = M5mqtt(name, host, port, '', '', 120)
+
+# Time variable 
+day = None
+month = None
+year = None
+hour = None
+minut = None
+sec = None 
 
 ###########################################
 # Functions which works with buttons 
@@ -171,17 +180,39 @@ def sentData():
   m5mqtt.publish(topTem, json.dumps({"temperature": temp, "time": convTime}))
   m5mqtt.publish(topHum, json.dumps({"humidity": hum, "time": convTime}))
   
+  
+def sub_cb(data):
+  global day, month, year, hour, minut, sec
+  data = str(data)
+  dayOfyear, timeOfday = data.split(" ")
+  day, month, year = dayOfyear.split(".")
+  hour, minut, sec = timeOfday.split(":")
+  
 ##############################################################################
+
 def main():
-  global m5mqtt
+  global m5mqtt, day, month, year, hour, minut, sec, rtc
   # connecting WiFi
   connectWiFi()
   
   # setting MQTT interface
+  m5mqtt.subscribe(str(topTime), sub_cb)
   m5mqtt.set_last_will("zpi", '...End...')
+  
   m5mqtt.start()
+  
   m5mqtt.publish("zpi", "...Start...")
   m5Lab = M5Label("MQTT Activated", x = 70, y = 120, color = 0x000000, font = FONT_MONT_18)
+  wait(2)
+  m5Lab.set_text("")
+  
+  # setting Time  
+  while (day is None or month is None or year is None or hour is None or minut is None or sec is None):
+    m5Lab.set_text("Set Actuall Time")
+    wait(2)
+  
+  m5Lab.set_text(str(day) + "." + str(month) + "." + str(year) + " " + str(hour) + ":" + str(minut) + ":" + str(sec))
+  rtc.datetime((int(year), int(month), int(day), 0, int(hour), int(minut), int(sec), 0))
   wait(2)
   m5Lab.set_text("")
   
