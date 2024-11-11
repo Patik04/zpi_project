@@ -191,13 +191,18 @@ def buttonB_wasPressed():
   function resets time's variables to None
   """
   global day, month, year, hour, minut, sec
-  day = None
-  month = None
-  year = None
-  hour = None
-  minut = None
-  sec = None
-  setTimeAndScreen()
+  if (day is not None or month is not None or year is not None or hour is not None or minut is not None or sec is not None):
+      day = None
+      month = None
+      year = None
+      hour = None
+      minut = None
+      sec = None
+      setTimeAndScreen()
+  else:
+      m5Info.set_text("Time already reset!")
+      wait(2)
+      m5Info.set_text("")
 ##############################################################################
 
 def loadData():
