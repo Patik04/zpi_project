@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 import matplotlib.pyplot as plt
+import datetime
 
 time_hum = []
 hum = []
@@ -46,6 +47,17 @@ if __name__ == "__main__":
     client.loop_start()
     try:
         while (True):
+            for time in time_hum:
+                dayOfyear, timeOfday = time.split("\n")
+                day, month, year = dayOfyear.split(".")
+                hour, minut, sec = timeOfday.split(":")
+                now = datetime.datetime.now()
+                if (now.minute - int(minut) > 10):
+                    time_hum.pop(0)
+                    hum.pop(0)
+                    temp.pop(0)
+                    time_temp.pop(0)
+
             if (len(time_hum) != 0 and len(hum) != 0
                     and len(time_temp) != 0 and len(temp) != 0):
                 plt.clf()
