@@ -38,8 +38,8 @@ imgHum = None
 env = unit.get(unit.ENV2, unit.PORTA)
 
 # WiFi variable
-WiFiSSID = "fg-11a-u"
-WifiPassword = "Miroslavpatik"
+WiFiSSID = ""
+WifiPassword = ""
 rtc = machine.RTC()
 
 # MQTT variables
