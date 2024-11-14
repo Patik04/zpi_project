@@ -236,14 +236,15 @@ def sub_cb(data):
   """
   global day, month, year, hour, minut, sec, m5Info
   data = str(data)
-  try:
-    dayOfyear, timeOfday = data.split(" ")
-    day, month, year = dayOfyear.split(".")
-    hour, minut, sec = timeOfday.split(":")
-  except:
-    m5Info.set_text("Invalid input")
-    wait(2)
-    pass
+  if (day is None or month is None or year is None or hour is None or minut is None or sec is None):
+    try:
+      dayOfyear, timeOfday = data.split(" ")
+      day, month, year = dayOfyear.split(".")
+      hour, minut, sec = timeOfday.split(":")
+    except:
+      m5Info.set_text("Invalid input")
+      wait(2)
+      pass
   
 ##########################################################
 #                     Main Code                          #
